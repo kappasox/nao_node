@@ -1,0 +1,22 @@
+# Environments
+venv312
+venv311
+venv310
+*/venv312
+*/venv311
+*/venv310
+.venv
+*/.venv
+# Git Examples
+
+# import
+__pycache__
+*/__pycache__
+*/*/__pycache__
+*/*/*/__pycache__
+*/*/*/*/__pycache__
+
+# password etc
+.env
+*/.env
+*/*/.env
