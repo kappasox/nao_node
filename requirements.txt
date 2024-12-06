@@ -6,7 +6,7 @@ adafruit-circuitpython-requests==4.1.8
 adafruit-circuitpython-typing==1.11.2
 Adafruit-PlatformDetect==3.75.0
 Adafruit-PureIO==1.1.11
-ambient==0.2.1
+#ambient==0.2.1
 binho-host-adapter==0.1.6
 certifi==2024.8.30
 charset-normalizer==3.4.0
