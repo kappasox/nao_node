@@ -36,18 +36,31 @@ from os.path import join, dirname
 from time import sleep
 
 import board 
-# pip3 install smbus2
+# pip install smbus2
 from adafruit_bme280 import basic as adafruit_bme280
-# pip3 install adafruit-circuitpython-bme280
+# pip install adafruit-circuitpython-bme280
+import adafruit_ssd1306
+# pip install adafruit-circuitpython-ssd1306
+
+from PIL import Image, ImageDraw, ImageFont
+#font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 28)
+font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 14)
+
 import ambient
-# pip3 install git+https://github.com/AmbientDataInc/ambient-python-lib.git
+# pip install git+https://github.com/AmbientDataInc/ambient-python-lib.git
 
 from dotenv import load_dotenv
-# pip3 install python-dotenv
+# pip install python-dotenv
+
+WIDTH = 128
+HEIGHT = 64
+BORDER = 5
 
 
 if ('__main__' == __name__):
+    print('wait 60 sec.')
     sleep(60) # if python starts too early, raspberry pi does not connect to the network.
+
     i2c = board.I2C()   # uses board.SCL and board.SDA
     bme280 = adafruit_bme280.Adafruit_BME280_I2C(i2c, address=0x76)
     bme280.sea_level_pressure = 1013.30 #2024/10/24 00:43
@@ -56,6 +69,11 @@ if ('__main__' == __name__):
     print("Pressure: %0.1f hPa" % bme280.pressure)
     print("Altitude = %0.2f meters" % bme280.altitude)
     sleep(3)
+
+    ssd1306 = adafruit_ssd1306.SSD1306_I2C(width=WIDTH, height=HEIGHT, i2c=i2c, addr=0x3c)
+
+    image = Image.new("1", (WIDTH, HEIGHT))
+    draw = ImageDraw.Draw(image)
 
     dotenv_file = join(dirname(__file__), '.env')
     load_dotenv(verbose=True, dotenv_path=dotenv_file)
@@ -74,6 +92,23 @@ if ('__main__' == __name__):
             except:
                 print('Error in using BME280!')
                 sleep(5)
+
+            try:
+                text_t = "Tempe: %0.1f C" % tempe
+                text_h = "Humid: %0.1f %%" % humid
+                text_p = "Prs: %0.1f hPa" % press
+
+                draw.rectangle((0, 0, WIDTH, HEIGHT), outline=0, fill=0)
+                draw.text((0, 0), text_t, font=font, fill=255)
+                draw.text((0, 16), text_h, font=font, fill=255)
+                draw.text((0, 32), text_p, font=font, fill=255)
+                ssd1306.image(image)
+                ssd1306.show()
+                sleep(1)
+            except:
+                print('Error in using SSD1306!')
+                sleep(5)
+
 
             try:
                 r = ambi.send({"d1": tempe, "d2": humid, "d3": press, "d4": altit})
