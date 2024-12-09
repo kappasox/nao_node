@@ -65,18 +65,28 @@ if ('__main__' == __name__):
 
     while True:
         try:
-            tempe = bme280.temperature
-            humid = bme280.relative_humidity
-            press = bme280.pressure
-            altit = bme280.altitude
-            print(tempe)
-            r = ambi.send({"d1": tempe, "d2": humid, "d3": press, "d4": altit})
+            try:
+                tempe = bme280.temperature
+                humid = bme280.relative_humidity
+                press = bme280.pressure
+                altit = bme280.altitude
+                print(tempe)
+            except:
+                print('Error in using BME280!')
+                sleep(5)
+
+            try:
+                r = ambi.send({"d1": tempe, "d2": humid, "d3": press, "d4": altit})
+            except:
+                print('Error: accessing ambient.io!')
+                sleep(30)
+
             sleep(5)
+
         except KeyboardInterrupt:
             print()
             print('Ctrl-C is pressed.')
             break
-
 
     print('Program ends.')
 
