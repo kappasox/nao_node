@@ -46,11 +46,13 @@ from PIL import Image, ImageDraw, ImageFont
 #font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 28)
 font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 14)
 
+from dotenv import load_dotenv
+# pip install python-dotenv
+
 import ambient
 # pip install git+https://github.com/AmbientDataInc/ambient-python-lib.git
 
-from dotenv import load_dotenv
-# pip install python-dotenv
+from devpro2_math import iput_math_class, NoDataError, TypeUnmatchError
 
 WIDTH = 128
 HEIGHT = 64
@@ -81,22 +83,52 @@ if ('__main__' == __name__):
     my_write_key = os.environ.get('WRITE_KEY')
     ambi = ambient.Ambient(my_channel_id, my_write_key) 
 
+    calc = iput_math_class()
+
     while True:
         try:
-            try:
-                tempe = bme280.temperature
-                humid = bme280.relative_humidity
-                press = bme280.pressure
-                altit = bme280.altitude
-                print(tempe)
-            except:
-                print('Error in using BME280!')
+            tempe_l = []
+            humid_l = []
+            press_l = []
+            altit_l = []
+            for i in range(12):
+                try:
+                    tempe = bme280.temperature
+                    humid = bme280.relative_humidity
+                    press = bme280.pressure
+                    altit = bme280.altitude
+                    print(tempe)
+                except:
+                    print('Error in using BME280!')
+                    sleep(5)
+
                 sleep(5)
+                
+                tempe_l.append(tempe)
+                humid_l.append(humid)
+                press_l.append(press)
+                altit_l.append(altit)
+
+            tempe_a = -300
+            humid_a = 0
+            press_a = 0
+            altit_a = -1000
+            try:
+                tempe_a = calc.get_avarage(tempe_l)
+                humid_a = calc.get_avarage(humid_l)
+                press_a = calc.get_avarage(press_l)
+                altit_a = calc.get_avarage(altit_l)
+            except NoDataError as e:
+                print(e)
+            except TypeUnmatchError as e:
+                print(e) 
+
+            print('===========')
 
             try:
-                text_t = "Tempe: %0.1f C" % tempe
-                text_h = "Humid: %0.1f %%" % humid
-                text_p = "Prs: %0.1f hPa" % press
+                text_t = "Tempe: %0.1f C" % tempe_a
+                text_h = "Humid: %0.1f %%" % humid_a
+                text_p = "Prs: %0.1f hPa" % press_a
 
                 draw.rectangle((0, 0, WIDTH, HEIGHT), outline=0, fill=0)
                 draw.text((0, 0), text_t, font=font, fill=255)
@@ -109,14 +141,11 @@ if ('__main__' == __name__):
                 print('Error in using SSD1306!')
                 sleep(5)
 
-
             try:
-                r = ambi.send({"d1": tempe, "d2": humid, "d3": press, "d4": altit})
+                r = ambi.send({"d1": tempe_a, "d2": humid_a, "d3": press_a, "d4": altit_a})
             except:
                 print('Error: accessing ambient.io!')
                 sleep(30)
-
-            sleep(5)
 
         except KeyboardInterrupt:
             print()
