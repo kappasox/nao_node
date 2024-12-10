@@ -91,7 +91,7 @@ if ('__main__' == __name__):
             humid_l = []
             press_l = []
             altit_l = []
-            for i in range(12):
+            for __ in range(24):
                 try:
                     tempe = bme280.temperature
                     humid = bme280.relative_humidity
